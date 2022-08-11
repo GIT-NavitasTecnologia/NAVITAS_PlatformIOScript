@@ -19,7 +19,7 @@ import time
 # ------------------
 FIRMWARE_FILE_NAME      = "scripts/firmwareInfo.json"
 FIRMWARE_OLD_FILE_NAME  = "scripts/backup_firmwareInfo.json"
-FIRMWARE_USB_UPDATE_ZIP = "scripts/usbUpdateInfo.zip"
+FIRMWARE_USB_UPDATE_ZIP = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip" # Same folder
 RELEASE_OUTPUT_FOLDER   = ".pio/release/"
 
 # ------------------
