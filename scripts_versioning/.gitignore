@@ -1,0 +1,5 @@
+# Para exemplos e documentação: https://git-scm.com/docs/gitignore
+
+__pycache__
+
+
