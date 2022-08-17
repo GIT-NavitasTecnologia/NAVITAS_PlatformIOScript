@@ -464,8 +464,12 @@ def pre_build_action(source, target, env):
     env['SRC_BUILD_FLAGS'].append(
         f"'-D NAVITAS_PROJECT_VERSION_NUMBER = {get_fmw_number_version(new_info)}'"
     )
+    boardName = get_fmw_board_name(new_info)
     env['SRC_BUILD_FLAGS'].append(
-        f"'-D NAVITAS_PROJECT_BOARD = {get_fmw_board_name(new_info)}'"
+        f"'-D NAVITAS_PROJECT_BOARD_NAME = \"{boardName}\"'"
+    )
+    env['SRC_BUILD_FLAGS'].append(
+        f"'-D NAVITAS_PROJECT_BOARD_{boardName.upper()}'"
     )
     env['SRC_BUILD_FLAGS'].append(
         f"'-D NAVITAS_PROJECT_GMT_DATE = \"{new_info['Date']}\"'"

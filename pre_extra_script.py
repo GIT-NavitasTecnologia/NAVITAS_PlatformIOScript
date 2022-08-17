@@ -4,6 +4,8 @@
 import firmware_manager
 from SCons.Script import COMMAND_LINE_TARGETS
 
+#TODO: Try to update the library
+#git submodule update --remote
 
 # ------------------
 # Main Script
