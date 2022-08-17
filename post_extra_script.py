@@ -1,3 +1,8 @@
+'''
+    PlatformIO Advanced Post-Build-Script for NavitasTecnologia
+    See: https://docs.platformio.org/en/latest/scripting/actions.html
+'''
+# pylint: disable=superfluous-parens,broad-except,E0602
 # ------------------
 # Importing Modules
 # ------------------

@@ -1,5 +1,6 @@
 '''
     PlatformIO Advanced Script for NavitasTecnologia
+    See: https://docs.platformio.org/en/latest/scripting/actions.html
 '''
 # pylint: disable=superfluous-parens,broad-except
 # ------------------
@@ -19,7 +20,7 @@ import time
 # ------------------
 FIRMWARE_FILE_NAME      = "scripts/firmwareInfo.json"
 FIRMWARE_OLD_FILE_NAME  = "scripts/backup_firmwareInfo.json"
-FIRMWARE_USB_UPDATE_ZIP = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip" # Same folder
+FIRMWARE_USB_UPDATE_ZIP = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip"
 RELEASE_OUTPUT_FOLDER   = ".pio/release/"
 
 # ------------------
@@ -464,12 +465,12 @@ def pre_build_action(source, target, env):
     env['SRC_BUILD_FLAGS'].append(
         f"'-D NAVITAS_PROJECT_VERSION_NUMBER = {get_fmw_number_version(new_info)}'"
     )
-    boardName = get_fmw_board_name(new_info)
+    board_name = get_fmw_board_name(new_info)
     env['SRC_BUILD_FLAGS'].append(
-        f"'-D NAVITAS_PROJECT_BOARD_NAME = \"{boardName}\"'"
+        f"'-D NAVITAS_PROJECT_BOARD_NAME = \"{board_name}\"'"
     )
     env['SRC_BUILD_FLAGS'].append(
-        f"'-D NAVITAS_PROJECT_BOARD_{boardName.upper()}'"
+        f"'-D NAVITAS_PROJECT_BOARD_{board_name.upper()}'"
     )
     env['SRC_BUILD_FLAGS'].append(
         f"'-D NAVITAS_PROJECT_GMT_DATE = \"{new_info['Date']}\"'"
