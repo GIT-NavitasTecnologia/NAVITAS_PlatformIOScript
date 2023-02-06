@@ -236,6 +236,17 @@ def get_git_branch() -> str:
         except Exception:
             pass
     return branch
+    
+def get_git_origin() -> str:
+    ''' Get git origin url '''
+    origin = ''
+    if( get_branch_has_commits() ):
+        try:
+            cmd = "git config --get remote.origin.url"
+            origin = subprocess.check_output(cmd, shell=True).decode().strip()
+        except Exception:
+            pass
+    return origin
 
 def get_files_pending_commit():
     ''' Get list of files pending commit'''
@@ -291,7 +302,7 @@ def delete_inside_folder( folder_name:str, list_to_ignore=None ):
     for filename in os.listdir( folder_name ):
         ignore_file = False
         for file_i in list_to_ignore:
-            if( file_i in filename ):
+            if( file_i.lower().strip() == filename.lower().strip() ):
                 ignore_file = True
                 break
         if( ignore_file ):
@@ -394,7 +405,8 @@ def get_fmw_info( p_file_name, env )->dict:
     "GIT_Project": "",
     "GIT_Version": "",
     "GIT_Branch": "",
-    "GIT_Commit": ""
+    "GIT_Commit": "",
+    "GIT_Origin": ""
 }
 ''')
     data_out['Date'] = datetime.datetime.utcnow().strftime("%d-%b-%Y-%H:%M")
@@ -406,6 +418,7 @@ def get_fmw_info( p_file_name, env )->dict:
     data_out['GIT_Project'] = get_git_proj_name()
     data_out['GIT_Branch']  = get_git_branch()
     data_out['GIT_Commit']  = get_git_commit()
+    data_out['GIT_Origin']  = get_git_origin()
 
     # Create or refresh json
     with open( FIRMWARE_FILE_NAME , 'w', encoding='UTF-8') as file:
@@ -431,6 +444,7 @@ def get_new_fmw_info( p_old_info, env ) -> dict:
     data_out['GIT_Version'] = get_git_proj_version()
     data_out['GIT_Branch']  = get_git_branch()
     data_out['GIT_Commit']  = get_git_commit()
+    data_out['GIT_Origin']  = get_git_origin()
     data_out['Board']       = env['BOARD']
     return data_out
 
@@ -496,7 +510,7 @@ def post_build_action(source, target, env):
     move_bin_files( env, output_folder )
 
     print("\t>> Zipping everything together")
-    zip_name = "v" + get_custom_fmw_tag( new_info ) + '.zip'
+    zip_name = new_info['GIT_Project'] + "_v" + get_custom_fmw_tag( new_info ) + '.zip'
     zipdir( RELEASE_OUTPUT_FOLDER + zip_name , output_folder )
     shutil.rmtree( output_folder )
     delete_inside_folder( RELEASE_OUTPUT_FOLDER, [zip_name] )
@@ -519,3 +533,4 @@ def post_extra_script_main(env, projenv):
 
 if __name__ == "__main__":
     show_git_info()
+    input("Enter to continue...")
