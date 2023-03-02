@@ -389,9 +389,24 @@ def move_bin_files( env, p_out_folder ):
                     shutil.copytree(file_j, binary_folder)
     # Prepare Upload Script
     script_str = get_upload_script(env, binary_folder)
+    script_str = fix_zip_file(env, script_str, p_out_folder)
     with open(p_out_folder + "uploadPorUSB.bat", 'w', encoding='UTF-8') as dir_i:
         dir_i.write(script_str)
     return #
+
+def fix_zip_file(env, script_str, p_out_folder) -> str:
+    ''' Fix zip file for current platform and board '''
+    binary_folder = p_out_folder + "bin/"
+    
+    # Move whole 'tool-esptoolpy' folder to zip
+    if( 'esptool' in env['UPLOAD_PROTOCOL'].lower() ):
+        uploader_path = env['UPLOADER']
+        if( "tool-esptoolpy" in uploader_path.lower() ):
+            folder_path = uploader_path[:uploader_path.rindex('\\')]
+            shutil.copytree(folder_path, binary_folder + "tool-esptoolpy\\")
+            os.remove( binary_folder + "esptool.py" )
+            script_str = script_str.replace('esptool.py', '"tool-esptoolpy\\esptool.py"')
+    return script_str
 
 def get_fmw_info( p_file_name, env )->dict:
     ''' Load Firmware Info JSON File '''
