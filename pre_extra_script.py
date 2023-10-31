@@ -6,7 +6,7 @@
 # ------------------
 # Importing Modules
 # ------------------
-from SCons.Script import COMMAND_LINE_TARGETS
+from SCons.Script import COMMAND_LINE_TARGETS #pylint: disable=W0611,E0401
 import firmware_manager
 
 #TODO: Try to update the library

@@ -331,10 +331,8 @@ def save_new_json_version( new_info: dict ) -> dict:
 def get_custom_fmw_tag( info: dict ) -> str:
     ''' Get full name of firmware version '''
     fmw_version_name = info['Version']
-    if( ('Board' in info) and (len(info['Board'].strip()) > 1) ):
-        if( ('esp32dev' != info['Board'].strip() ) and
-            ('esp-wrover-kit' != info['Board'].strip() ) ):
-            fmw_version_name += "-" + info['Board'].strip()
+    if( ('PIOENV' in info) and (len(info['PIOENV'].strip()) > 1) ):
+        fmw_version_name += "-" + info['PIOENV'].strip()
     if( len( info['Description'].strip() ) > 1 ):
         fmw_version_name += "-" + info['Description']
     if( len( info['GIT_Commit'].strip() ) > 1 ):
@@ -416,6 +414,7 @@ def get_fmw_info( p_file_name, env )->dict:
     "Version": "1.0.0",
     "Description": "",
     "Board": "",
+    "PIOENV": "",
     "Date": "",
     "GIT_Project": "",
     "GIT_Version": "",
@@ -429,7 +428,8 @@ def get_fmw_info( p_file_name, env )->dict:
     if( os.path.exists( p_file_name ) ):
         data_out = json.loads( open( p_file_name , 'r', encoding='UTF-8' ).read() )
     # Override
-    data_out['Board']       = env['BOARD']
+    data_out['Board']       = env.get('BOARD',"")
+    data_out['PIOENV']      = env.get('PIOENV',"").replace("-","_").upper()
     data_out['GIT_Project'] = get_git_proj_name()
     data_out['GIT_Branch']  = get_git_branch()
     data_out['GIT_Commit']  = get_git_commit()
@@ -460,7 +460,8 @@ def get_new_fmw_info( p_old_info, env ) -> dict:
     data_out['GIT_Branch']  = get_git_branch()
     data_out['GIT_Commit']  = get_git_commit()
     data_out['GIT_Origin']  = get_git_origin()
-    data_out['Board']       = env['BOARD']
+    data_out['Board']       = env.get('BOARD',"")
+    data_out['PIOENV']      = env.get('PIOENV',"").replace("-","_").upper()
     return data_out
 
 
