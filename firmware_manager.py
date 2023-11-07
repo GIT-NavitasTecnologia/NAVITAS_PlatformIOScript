@@ -526,10 +526,12 @@ def post_build_action(source, target, env):
     move_bin_files( env, output_folder )
 
     print("\t>> Zipping everything together")
-    zip_name = new_info['GIT_Project'] + "_v" + get_custom_fmw_tag( new_info ) + '.zip'
-    zipdir( RELEASE_OUTPUT_FOLDER + zip_name , output_folder )
+    zip_name   = new_info['GIT_Project'] + "_v" + get_custom_fmw_tag( new_info ) + '.zip'
+    zip_folder = RELEASE_OUTPUT_FOLDER + env.get('PIOENV',"unknown") + "/"
+    os.makedirs( zip_folder, exist_ok=True )
+    zipdir( zip_folder + zip_name , output_folder )
     shutil.rmtree( output_folder )
-    delete_inside_folder( RELEASE_OUTPUT_FOLDER, [zip_name] )
+    delete_inside_folder( zip_folder, [zip_name] )
 
     print( "\n", "-"*70, "\n" )
     return #
