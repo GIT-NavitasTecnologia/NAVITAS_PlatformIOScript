@@ -18,10 +18,11 @@ import time
 # ------------------
 # Constants
 # ------------------
-FIRMWARE_FILE_NAME      = "scripts/firmwareInfo.json"
-FIRMWARE_OLD_FILE_NAME  = "scripts/backup_firmwareInfo.json"
-FIRMWARE_USB_UPDATE_ZIP = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip"
-RELEASE_OUTPUT_FOLDER   = ".pio/release/"
+FIRMWARE_FILE_NAME           = "scripts/firmwareInfo.json"
+FIRMWARE_OLD_FILE_NAME       = "scripts/backup_firmwareInfo.json"
+FIRMWARE_USB_UPDATE_ZIP_MAIN = os.path.realpath(__file__).rsplit('\\',2)[0] + "\\usbUpdateInfo.zip"
+FIRMWARE_USB_UPDATE_ZIP_ALT  = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip"
+RELEASE_OUTPUT_FOLDER        = ".pio/release/"
 
 # ------------------
 # Functions
@@ -364,7 +365,10 @@ def get_list_of_files_to_copy(env):
 
 def move_bin_files( env, p_out_folder ):
     ''' Move binary files related to the firmware to a release folder '''
-    with zipfile.ZipFile( FIRMWARE_USB_UPDATE_ZIP, 'r' ) as zip_ref:
+    zip_path = FIRMWARE_USB_UPDATE_ZIP_ALT
+    if( os.path.exists(FIRMWARE_USB_UPDATE_ZIP_MAIN) ):
+        zip_path = FIRMWARE_USB_UPDATE_ZIP_MAIN
+    with zipfile.ZipFile( zip_path, 'r' ) as zip_ref:
         zip_ref.extractall( p_out_folder )
     binary_folder = p_out_folder + "bin/"
     if( not os.path.exists(binary_folder) ):
