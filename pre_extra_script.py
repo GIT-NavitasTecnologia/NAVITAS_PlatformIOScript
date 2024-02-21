@@ -23,3 +23,6 @@ if "idedata" in COMMAND_LINE_TARGETS:
 firmware_manager.pre_extra_script_main(env)
 
 print( "\n", "-"*70, "\n" )
+
+# Dump global construction environment (for debug purpose)
+#with open("dump_env.ini"    ,"w",encoding="utf-8") as file: file.write( str( env.Dump ) )

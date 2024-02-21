@@ -2,7 +2,7 @@
     PlatformIO Advanced Script for NavitasTecnologia
     See: https://docs.platformio.org/en/latest/scripting/actions.html
 '''
-# pylint: disable=superfluous-parens,broad-except
+# pylint: disable=superfluous-parens,broad-except,useless-return
 # ------------------
 # Importing Modules
 # ------------------
@@ -24,6 +24,9 @@ FIRMWARE_USB_UPDATE_ZIP_MAIN = os.path.realpath(__file__).rsplit('\\',2)[0] + "\
 FIRMWARE_USB_UPDATE_ZIP_ALT  = os.path.realpath(__file__).rsplit('\\',1)[0] + "\\usbUpdateInfo.zip"
 RELEASE_OUTPUT_FOLDER        = ".pio/release/"
 
+REM_PIO_UPLOAD_START = "Rem begin pio upload command\n"
+REM_PIO_UPLOAD_END   = "\nRem end pio upload command"
+
 # ------------------
 # Functions
 # ------------------
@@ -38,26 +41,26 @@ def get_default_firmware_path(env):
 
 def get_from_env_recursive(env, p_value, p_path_to_copy_n_paste = ''):
     ''' Find p_value from env '''
+    # TODO use env.get( p_value, p_value ), env.subst( p_value )
+
     if( isinstance(p_value, list) ):
         # List of values
         out_value = ""
-        for p_value_i in p_value:
+        for i, p_value_i in enumerate(p_value):
             p_value_i = p_value_i.replace('\'', '').replace('\"','').strip()
             out_value += get_from_env_recursive(env, p_value_i, p_path_to_copy_n_paste)
-            if( p_value_i != p_value[-1] ):
+            if( i != ( len(p_value) - 1 ) ):
                 out_value += " "
         return out_value
 
-    elif( isinstance(p_value, str) and p_value.count(' ')>1 ):
+    elif( isinstance(p_value, str) and p_value.count(' ') > 1 ):
         # Space separated values
-        tags = [ xi.replace('\'', '').replace('\"','').strip()
+        tags = [
+            xi.replace('\'', '').replace('\"','').strip()
             for xi in p_value.split()
         ]
         tags_parsed = [get_from_env_recursive(env, t, p_path_to_copy_n_paste) for t in tags]
-        parsed = p_value
-        for i,tag_i in enumerate( p_value.split() ):
-            parsed = parsed.replace(tag_i, tags_parsed[i])
-        return parsed
+        return ' '.join(tags_parsed)
 
     elif(str(p_value).count('$') > 1):
         # String with multiple tags
@@ -67,32 +70,43 @@ def get_from_env_recursive(env, p_value, p_path_to_copy_n_paste = ''):
         ]
         tags_parsed = [get_from_env_recursive(env, '$' + t, p_path_to_copy_n_paste) for t in tags]
         parsed      = p_value
+        #return ' '.join(tags_parsed)
         for i,tag_i in enumerate( tags ):
-            parsed = parsed.replace(f'${tag_i}', tags_parsed[i])
+            parsed = parsed.replace(f'${tag_i}', tags_parsed[i], 1)
         return parsed
 
     elif( ('${' in str(p_value) ) and ('}' in str(p_value) ) ):
         # Value is a function to be called
-        fun_str   = p_value[2:].split('(')[0]
-        param_str = p_value[p_value.index('(')+1:].split(')')[0].strip()
-        if(param_str == '__env__'):
+        fun_str  = p_value[2:].split('(')[0]
+        params   = p_value[p_value.index('(')+1:].split(')')[0].strip().split(',')
+        if( len(params) == 0 ):
+            return str(env[fun_str]())
+        if( len(params)==1 and ( params[0] == '__env__') ):
             return str(env[fun_str](env))
-        return str(env[fun_str]())
+        return env.subst( p_value )
 
     elif(str(p_value).count('$') == 1):
-        # Value is another key
-        key = p_value[1:].replace('\'', '').replace('\"','').strip()
+        #/ Value is another key
+        add_bracets = ( (p_value[0] == '{') and (p_value[-1] == '}') )
+        key         = p_value[ p_value.index('$') + 1: ].replace('\'', '').replace('\"','').strip()
+        if( add_bracets ):
+            key = key[:-1]
+        out_param   = ''
         if( key in ['UPLOAD_PORT'] ):
-            return '' # Ignore these values
+            # Ignore these values
+            out_param = ''
         elif( key in env ):
-            return get_from_env_recursive(env, env[key], p_path_to_copy_n_paste)
+            # Get value from env
+            out_param = get_from_env_recursive(env, env[key], p_path_to_copy_n_paste)
+        elif( key.upper() == "SOURCE" ):
+            # Get firmware file
+            fmw_path = get_default_firmware_path(env)
+            out_param = get_from_env_recursive(env, fmw_path, p_path_to_copy_n_paste)
         else:
-            if( key.upper() == "SOURCE" ):
-                fmw_path = get_default_firmware_path(env)
-                return get_from_env_recursive(env, fmw_path, p_path_to_copy_n_paste)
-            if( key.upper() != "UPLOAD_PORT" ):
-                print( f'"{key}" not found!' )
+            # Not found
+            print( f'"{key}" not found!' )
             return f"${key}"
+        return '{%s}' % out_param if add_bracets else out_param
 
     # Path to file
     if( os.path.isfile( str(p_value) ) ):
@@ -135,13 +149,15 @@ if exist "bin" (
 )
 
 '''
-
-    upload_cmd_str = get_from_env_recursive(env, '$UPLOADCMD', p_path_to_copy_n_paste)
+    upload_cmd_str = get_from_env_recursive(env, env['UPLOADCMD'], p_path_to_copy_n_paste)
     upload_cmd_str = upload_cmd_str.replace('python.exe', r'%PYTHON_DIR%')
     upload_cmd_str = upload_cmd_str.replace('--port ', '')
     upload_cmd_str = upload_cmd_str.replace('$UPLOAD_PORT', '')
     upload_cmd_str = upload_cmd_str.replace('  ', ' ')
+
+    out_str += REM_PIO_UPLOAD_START
     out_str += upload_cmd_str.strip()
+    out_str += REM_PIO_UPLOAD_END
 
     fmw_path = get_default_firmware_path(env)
     md5_value = get_firmware_md5( fmw_path )
@@ -237,7 +253,7 @@ def get_git_branch() -> str:
         except Exception:
             pass
     return branch
-    
+
 def get_git_origin() -> str:
     ''' Get git origin url '''
     origin = ''
@@ -365,14 +381,20 @@ def get_list_of_files_to_copy(env):
 
 def move_bin_files( env, p_out_folder ):
     ''' Move binary files related to the firmware to a release folder '''
+
+    # First extract the zip folder
     zip_path = FIRMWARE_USB_UPDATE_ZIP_ALT
     if( os.path.exists(FIRMWARE_USB_UPDATE_ZIP_MAIN) ):
         zip_path = FIRMWARE_USB_UPDATE_ZIP_MAIN
     with zipfile.ZipFile( zip_path, 'r' ) as zip_ref:
         zip_ref.extractall( p_out_folder )
+
+    # Create a binary folder
     binary_folder = p_out_folder + "bin/"
     if( not os.path.exists(binary_folder) ):
         os.makedirs( binary_folder )
+
+    # Copy every file to the binary folder
     for dir_i in get_list_of_files_to_copy(env):
         if( isinstance(dir_i, str) ):
             if( not os.path.exists(dir_i) ):
@@ -389,6 +411,7 @@ def move_bin_files( env, p_out_folder ):
                     shutil.copy2(file_j, binary_folder)
                 else:
                     shutil.copytree(file_j, binary_folder)
+
     # Prepare Upload Script
     script_str = get_upload_script(env, binary_folder)
     script_str = fix_zip_file(env, script_str, p_out_folder)
@@ -399,7 +422,12 @@ def move_bin_files( env, p_out_folder ):
 def fix_zip_file(env, script_str, p_out_folder) -> str:
     ''' Fix zip file for current platform and board '''
     binary_folder = p_out_folder + "bin/"
-    
+
+    pio_upload_start_index = script_str.index(REM_PIO_UPLOAD_START) + len(REM_PIO_UPLOAD_START)
+    pio_upload_end_index   = script_str.index(REM_PIO_UPLOAD_END  )
+    pio_upload             = script_str[pio_upload_start_index : pio_upload_end_index]
+    new_pio_upload         = pio_upload
+
     # Move whole 'tool-esptoolpy' folder to zip
     if( 'esptool' in env['UPLOAD_PROTOCOL'].lower() ):
         uploader_path = env['UPLOADER']
@@ -407,7 +435,67 @@ def fix_zip_file(env, script_str, p_out_folder) -> str:
             folder_path = uploader_path[:uploader_path.rindex('\\')]
             shutil.copytree(folder_path, binary_folder + "tool-esptoolpy\\")
             os.remove( binary_folder + "esptool.py" )
-            script_str = script_str.replace('esptool.py', '"tool-esptoolpy\\esptool.py"')
+            new_pio_upload = new_pio_upload.replace('esptool.py', '"tool-esptoolpy\\esptool.py"')
+    elif( 'openocd' == env['UPLOADER'].lower() ):
+        # Tested with 'stlink' in env['UPLOAD_PROTOCOL'].lower()
+        env_paths     = env.get("ENV",'')["PATH"].split(';')
+        uploader_path = env.get('UPLOADER','')
+        for path_i in env_paths:
+            if( 'openocd' in path_i ):
+                uploader_path  = path_i
+                folder_path    = uploader_path[ : uploader_path.rindex('\\') ]
+                new_pio_upload = new_pio_upload.replace('openocd', '\"tool-openocd/bin/openocd\"',1)
+                new_pio_upload = new_pio_upload.replace(folder_path, r'tool-openocd',1)
+                shutil.copytree(folder_path, binary_folder + "tool-openocd\\")
+                # Copy .elf too for STM32CubeProgrammer
+                if( 'PROGPATH' in env ):
+                    elf_path = env.subst('$PROGPATH')
+                    if( os.path.isfile(elf_path) and '.elf' in elf_path ):
+                        shutil.copy2(elf_path, p_out_folder)
+
+                def _add_double_quote(cmd, opt1, opt2):
+                    opt1 = f" {opt1} "
+                    opt2 = f" {opt2} "
+
+                    ref = cmd
+                    while(1):
+                        has_opt1 = (opt1 in ref)
+                        has_opt2 = (opt2 in ref)
+                        if( has_opt1 or has_opt2 ):
+                            # Find where param starts
+                            index_start = -1
+                            if( has_opt1 ):
+                                index_start = ref.index(opt1) + len(opt1)
+                            else:
+                                index_start = ref.index(opt2) + len(opt2)
+                            # Find where param ends
+                            index_end = -1
+                            aux = ''
+                            if(not (' -' in ref[index_start:] )):
+                                aux = ref[ index_start : ]
+                                ref = ''
+                            else:
+                                index_end = index_start + ref[index_start:].index(' -')
+                                aux = ref[ index_start : index_end ]
+                                ref = ref[ index_end + 1: ]
+                            cmd = cmd.replace(
+                                aux,
+                                f'\"{aux}\"',
+                                1
+                            )
+                        else:
+                            break
+                    return cmd
+
+                # Add double quotes to openocd --command param
+                new_pio_upload   = _add_double_quote(new_pio_upload  , "-c", "--command")
+                # Add double quotes to openocd --file param
+                new_pio_upload   = _add_double_quote(new_pio_upload  , "-f", "--file"   )
+                # Add double quotes to openocd --search param
+                new_pio_upload   = _add_double_quote(new_pio_upload  , "-s", "--search" )
+                break
+
+    script_str = script_str.replace( pio_upload  , new_pio_upload  , 1)
     return script_str
 
 def get_fmw_info( p_file_name, env )->dict:

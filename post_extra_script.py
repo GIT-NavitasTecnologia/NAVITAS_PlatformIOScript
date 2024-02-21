@@ -17,3 +17,7 @@ Import("env", "projenv")
 firmware_manager.post_extra_script_main(env, projenv)
 
 print( "\n", "-"*70, "\n" )
+
+# Dump global construction environment (for debug purpose)
+#with open("dump_env.ini"    ,"w",encoding="utf-8") as file: file.write( str( env.Dump ) )
+#with open("dump_projenv.ini","w",encoding="utf-8") as file: file.write( str( projenv.Dump) )
