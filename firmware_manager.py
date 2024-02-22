@@ -452,6 +452,8 @@ def fix_zip_file(env, script_str, p_out_folder) -> str:
                     elf_path = env.subst('$PROGPATH')
                     if( os.path.isfile(elf_path) and '.elf' in elf_path ):
                         shutil.copy2(elf_path, p_out_folder)
+                        # Use .elf instead of .bin
+                        new_pio_upload = new_pio_upload.replace('firmware.bin', '../firmware.elf')
 
                 def _add_double_quote(cmd, opt1, opt2):
                     opt1 = f" {opt1} "
