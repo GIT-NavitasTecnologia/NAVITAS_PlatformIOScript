@@ -25,10 +25,12 @@ This is a [PlatformIO Advanced-Script](https://docs.platformio.org/en/latest/scr
 ## VSCode PlatformIO
 
 1. Create your [VSCode PlatformIO](https://docs.platformio.org/en/latest/integration/ide/vscode.html) project;
-1. Open the PlatformIO project folder with `git bash`;
-1. Add this submodule to path: `scripts/versioning`:
-`git submodule add https://github.com/GIT-NavitasTecnologia/NAVITAS_PlatformIOScript.git scripts/versioning`
-1. Open your `platformio.ini` file and add the following lines:
+2. Open the PlatformIO project folder with `git bash`;
+3. Add this submodule to path: `scripts/versioning`: 
+```[bash]
+git submodule add https://github.com/GIT-NavitasTecnologia/NAVITAS_PlatformIOScript.git scripts/versioning
+```
+4. Open your `platformio.ini` file and add the following lines:
 ```[ini]
 extra_scripts =
 	post:scripts/versioning/post_extra_script.py
