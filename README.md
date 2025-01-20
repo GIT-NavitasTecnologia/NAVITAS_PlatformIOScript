@@ -36,7 +36,7 @@ extra_scripts =
 	post:scripts/versioning/post_extra_script.py
 	pre:scripts/versioning/pre_extra_script.py
 ```
-1. Do **not** add these files to `.gitignore`:
+5. Do **not** add these files to `.gitignore`:
  - `scripts/firmwareInfo.json`
  - `scripts/backup_firmwareInfo.json`
 
