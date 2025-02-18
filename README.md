@@ -4,6 +4,7 @@ This is a [PlatformIO Advanced-Script](https://docs.platformio.org/en/latest/scr
  - [Features](#Features)
  - [How to Use](#How_to_use)
   - [VSCode PlatformIO](#VSCode_PlatformIO)
+  - [Release zip](#Release_zip)
   - [Built-in Macros](#Built_in_Macros)
     - [`NAVITAS_PROJECT_VERSION`](#NAVITAS_PROJECT_VERSION)
 	- [`NAVITAS_PROJECT_VERSION_NUMBER`](#NAVITAS_PROJECT_VERSION_NUMBER)
@@ -12,7 +13,6 @@ This is a [PlatformIO Advanced-Script](https://docs.platformio.org/en/latest/scr
 	- [`NAVITAS_PROJECT_GMT_DATE`](#NAVITAS_PROJECT_GMT_DATE)
 	- [`NAVITAS_PROJECT_EPOCH`](#NAVITAS_PROJECT_EPOCH)
 	- [`NAVITAS_PROJECT_BOARD_x`](#NAVITAS_PROJECT_BOARD_x)
- - [Release zip](#Release_zip)
 
 # Features
 
@@ -39,6 +39,10 @@ extra_scripts =
 5. Do **not** add these files to `.gitignore`:
  - `scripts/firmwareInfo.json`
  - `scripts/backup_firmwareInfo.json`
+
+## Release zip
+
+After building your application with vscode, the `zip` file will be available inside the folder `.pio/release/`
 
 ## Built-in Macros
 
@@ -79,15 +83,11 @@ Example:
 ```cpp
 
 #if   defined(NAVITAS_PROJECT_BOARD_ESP32CAM)
-	#warning "Developing for ESP32CAM"
+	#pragma message("Developing for ESP32CAM")
 #elif defined(NAVITAS_PROJECT_BOARD_WT32_ETH01)
-	#warning "Developing for WT32-ETH01"
+	#pragma message("Developing for WT32-ETH01")
 #else
 	#error "Board not yet compatible!"
 #endif
 
 ```
-
-## Release zip
-
-After building your application with vscode, the `zip` file will be available inside the folder `.pio/release/`
