@@ -5,7 +5,7 @@ This is a [PlatformIO Advanced-Script](https://docs.platformio.org/en/latest/scr
  - [How to Use](#How_to_use)
   - [VSCode PlatformIO](#VSCode_PlatformIO)
   - [Release zip](#Release_zip)
-  - [Built-in Macros](#Built_in_Macros)
+  - [Constants](#Constants)
     - [`NAVITAS_PROJECT_VERSION`](#NAVITAS_PROJECT_VERSION)
 	- [`NAVITAS_PROJECT_VERSION_NUMBER`](#NAVITAS_PROJECT_VERSION_NUMBER)
 	- [`NAVITAS_PROJECT_BOARD_NAME`](#NAVITAS_PROJECT_BOARD_NAME)
@@ -44,7 +44,9 @@ extra_scripts =
 
 After building your application with vscode, the `zip` file will be available inside the folder `.pio/release/`
 
-## Built-in Macros
+## Constants
+
+A C library called `firwmare_info` will be available in `lib` folder, with the following constants:
 
 ### `NAVITAS_PROJECT_VERSION`
 
@@ -82,9 +84,9 @@ Unix timestamp relative to the time of the firmware build;
 Example:
 ```cpp
 
-#if   defined(NAVITAS_PROJECT_BOARD_ESP32CAM)
+#if   (NAVITAS_PROJECT_BOARD_ESP32CAM)
 	#pragma message("Developing for ESP32CAM")
-#elif defined(NAVITAS_PROJECT_BOARD_WT32_ETH01)
+#elif (NAVITAS_PROJECT_BOARD_WT32_ETH01)
 	#pragma message("Developing for WT32-ETH01")
 #else
 	#error "Board not yet compatible!"
