@@ -16,7 +16,7 @@ print( "\n", "-"*70, "\n\n", '\tpost_extra_script' )
 
 try:
     if not fmw.pio_tools.has_cmd_line_target("idedata"):
-        env = Import("env", "projenv")
+        Import("env", "projenv")
 
         # Dump global construction environment (for debug purpose)
         with open("dump_env.ini"    ,"w",encoding="utf-8") as file:
