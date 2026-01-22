@@ -22,7 +22,7 @@ import git_tools
 # ------------------
 CUR_FMW_INFO                 = "scripts/firmwareInfo.json"
 OLD_FMW_INFO                 = "scripts/backup_firmwareInfo.json"
-THIS_PATH                    = Path( os.path.realpath(__file__) )
+THIS_PATH                    = Path( os.path.realpath(__file__) ).parent
 FIRMWARE_USB_UPDATE_ZIP_MAIN = os.path.realpath( THIS_PATH / "../usbUpdateInfo.zip" )
 FIRMWARE_USB_UPDATE_ZIP_ALT  = os.path.realpath( THIS_PATH /  "./usbUpdateInfo.zip" )
 RELEASE_OUTPUT_FOLDER        = ".pio/release/"
