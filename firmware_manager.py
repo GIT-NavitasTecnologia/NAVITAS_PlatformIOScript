@@ -425,18 +425,16 @@ def pre_build_action(source, target, env):
             new_info = get_new_fmw_info( old_info, env )
     else:
         print("\tNO pending changes to commit.\n\tFirmware info is NOT going to be updated!")
+    build_time = int(time.time())
+    board_name = get_fmw_board_name(new_info)
+    new_info['build_epoch'] = build_time
     save_new_json_version( new_info )
+
     print()
     print("\tFirmware Version          =", new_info['Version']      )
     print("\tFirmware Description      =", new_info['Description']  )
     print("\tFirmware Compilation Date =", new_info['Date']         )
     print("\tFirmware Version-Name     =", get_custom_fmw_tag(new_info) )
-
-    board_name = get_fmw_board_name(new_info)
-
-    # Round epoch time
-    build_time = int(time.time())
-    #build_time -= build_time % (30 * 60)
 
     macro_values = {
         'NAVITAS_PROJECT_VERSION':                     f'\"{get_custom_fmw_tag(new_info)}\"',
